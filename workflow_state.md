@@ -1,178 +1,255 @@
 # Workflow State
 
 ## State
-- **Phase**: CONSTRUCT
-- **Status**: IN_PROGRESS
-- **Current Task**: Phase 1 - Project Foundation (Next.js 15.3.5 setup)
+- **Phase**: BLUEPRINT
+- **Status**: NEEDS_PLAN_APPROVAL
+- **Current Task**: Phase 3 - Build Management System (CRUD Operations & Components)
 
 ## Plan
 
-### Phase 1: Project Foundation
-1. **Initialize Next.js Project**
-   - Create Next.js 15.3.5 project with TypeScript
-   - Configure Tailwind CSS with custom wood-inspired theme
-   - Set up ESLint, Prettier, and TypeScript strict mode
-   - Create base project structure
+### Phase 3: Build Management System - Detailed Blueprint
 
-2. **Core Type Definitions**
-   ```typescript
-   interface Build {
-     id: string;
-     name: string;
-     woodType: string;
-     style: string;
-     startDate: Date;
-     clientName?: string;
-     notes?: string;
-     photos: Photo[];
-   }
+#### 1. Database Layer & Storage
+```typescript
+// src/lib/database.ts - Build-specific operations
+class BuildsDatabase {
+  async createBuild(buildData: CreateBuildFormData): Promise<Build>
+  async getBuild(id: string): Promise<Build | null>
+  async getAllBuilds(): Promise<Build[]>
+  async updateBuild(id: string, data: UpdateBuildFormData): Promise<Build>
+  async deleteBuild(id: string): Promise<void>
+  async searchBuilds(filters: BuildFilters): Promise<Build[]>
+  async getBuildWithPhotos(id: string): Promise<Build & { photos: Photo[] }>
+}
+```
 
-   interface Photo {
-     id: string;
-     googlePhotoId: string;
-     url: string;
-     thumbnail: string;
-     timestamp: Date;
-     filename: string;
-     buildId?: string;
-     caption?: string;
-     scheduledDate?: Date;
-     posted: boolean;
-   }
-   ```
+#### 2. Build CRUD Operations
 
-3. **Database Layer Setup**
-   - Implement IndexedDB with Dexie.js for local storage
-   - Create stores for builds, photos, and assignments
-   - Implement CRUD operations with TypeScript types
+**2.1 Build Form Validation**
+```typescript
+// src/lib/validation.ts
+export const buildFormSchema = {
+  name: { required: true, minLength: 2, maxLength: 100 },
+  woodType: { required: true, enum: WoodType },
+  style: { required: true, enum: BuildStyle },
+  startDate: { required: true, type: 'date', max: new Date() },
+  clientName: { optional: true, maxLength: 100 },
+  notes: { optional: true, maxLength: 1000 }
+}
+```
 
-### Phase 2: Authentication & Google Photos Integration
-1. **OAuth 2.0 Setup**
-   - Configure NextAuth.js with Google provider
-   - Set up Google Photos Library API credentials
-   - Implement secure token management
-   - Create authentication middleware
+**2.2 Build API Routes**
+```typescript
+// src/app/api/builds/route.ts - GET, POST endpoints
+// src/app/api/builds/[id]/route.ts - GET, PUT, DELETE endpoints
+// Error handling with proper HTTP status codes
+// Input validation using the schema
+// TypeScript response typing
+```
 
-2. **Google Photos API Client**
-   - Build API client for Google Photos Library API
-   - Implement photo fetching with pagination
-   - Add search and date filtering capabilities
-   - Handle rate limiting and error cases
+#### 3. Build Components Architecture
 
-3. **Photo Grid Component**
-   - Create responsive photo grid with lazy loading
-   - Implement thumbnail display with metadata overlay
-   - Add infinite scroll for large libraries
-   - Include loading states and error handling
+**3.1 BuildForm Component**
+```typescript
+// src/components/builds/BuildForm.tsx
+interface BuildFormProps {
+  build?: Build; // undefined = create mode, defined = edit mode
+  onSubmit: (data: CreateBuildFormData | UpdateBuildFormData) => Promise<void>;
+  onCancel: () => void;
+  isLoading?: boolean;
+}
+```
 
-### Phase 3: Build Management System
-1. **Build CRUD Operations**
-   - Create "New Build" form with validation
-   - Implement build editing capabilities
-   - Add build deletion with confirmation
-   - Create build listing with search/filter
+Features:
+- Wood type dropdown with search/filter
+- Build style selection with icons
+- Date picker with validation (no future dates)
+- Client name with autocomplete from previous builds
+- Notes textarea with character count
+- Real-time validation with error display
+- Loading states during submission
 
-2. **Build Components**
-   - BuildCard component with progress indicators
-   - BuildForm component with dropdown selections
-   - BuildTimeline component for photo organization
-   - BuildMetadata component for details display
+**3.2 BuildCard Component**
+```typescript
+// src/components/builds/BuildCard.tsx
+interface BuildCardProps {
+  build: Build;
+  photoCount: number;
+  onEdit: () => void;
+  onDelete: () => void;
+  onViewDetails: () => void;
+  className?: string;
+}
+```
 
-### Phase 4: Photo Classification Interface
-1. **Drag & Drop System**
-   - Implement React DnD for photo assignment
-   - Create drop zones for each build
-   - Add visual feedback during drag operations
-   - Handle drag-and-drop state management
+Features:
+- Wood-inspired card design with thumbnail
+- Build progress indicator (based on photos assigned)
+- Build metadata display (wood type, style, start date)
+- Action buttons (edit, delete, view details)
+- Photo count badge
+- Responsive layout (grid on desktop, stack on mobile)
 
-2. **Bulk Operations**
-   - Multi-select functionality for photos
-   - Bulk assignment to builds
-   - Bulk unassignment capabilities
-   - Progress indicators for bulk operations
+**3.3 BuildList Component**
+```typescript
+// src/components/builds/BuildList.tsx
+interface BuildListProps {
+  builds: Build[];
+  onCreateNew: () => void;
+  onEditBuild: (build: Build) => void;
+  onDeleteBuild: (buildId: string) => void;
+  isLoading?: boolean;
+}
+```
 
-3. **Photo Assignment UI**
-   - Visual indicators for assigned vs unassigned photos
-   - Build assignment dropdown per photo
-   - Photo filtering by assignment status
-   - Timeline view of assigned photos within builds
+Features:
+- Search functionality (name, wood type, client)
+- Filter controls (wood type, style, date range)
+- Sort options (name, date, progress)
+- Empty state with call-to-action
+- Loading skeletons
+- Pagination for large build lists
 
-### Phase 5: Content Generation Interface
-1. **Caption Management**
-   - Text area component with character counting
-   - Caption templates for different build stages
-   - Auto-save functionality for captions
-   - Caption preview with photo context
+**3.4 BuildDetails Component**
+```typescript
+// src/components/builds/BuildDetails.tsx
+interface BuildDetailsProps {
+  build: Build;
+  photos: Photo[];
+  onEditBuild: () => void;
+  onDeleteBuild: () => void;
+  onAssignPhoto: (photoId: string) => void;
+  onUnassignPhoto: (photoId: string) => void;
+}
+```
 
-2. **Content Templates**
-   - Pre-defined templates for build stages:
-     * Wood selection and planning
-     * Rough shaping and cutting
-     * Joinery and assembly
-     * Finishing and setup
-     * Final reveal
-   - Template customization options
-   - Template variables (wood type, build name, etc.)
+Features:
+- Full build information display
+- Assigned photos grid with timeline view
+- Build timeline/progress tracker
+- Photo assignment interface
+- Edit/delete actions with confirmations
 
-### Phase 6: Content Calendar
-1. **Calendar Component**
-   - Monthly calendar view with scheduled posts
-   - Day cells showing post thumbnails and previews
-   - Drag-and-drop for rescheduling posts
-   - Calendar navigation (previous/next month)
+#### 4. State Management
 
-2. **Scheduling System**
-   - Date picker for post scheduling
-   - Posting frequency selector
-   - Automatic scheduling suggestions
-   - Schedule conflict detection
+**4.1 Build Context**
+```typescript
+// src/contexts/BuildContext.tsx
+interface BuildContextType {
+  builds: Build[];
+  selectedBuild: Build | null;
+  isLoading: boolean;
+  error: string | null;
+  
+  // Actions
+  createBuild: (data: CreateBuildFormData) => Promise<void>;
+  updateBuild: (id: string, data: UpdateBuildFormData) => Promise<void>;
+  deleteBuild: (id: string) => Promise<void>;
+  selectBuild: (build: Build | null) => void;
+  refreshBuilds: () => Promise<void>;
+  searchBuilds: (filters: BuildFilters) => Promise<void>;
+}
+```
 
-3. **Export Functionality**
-   - Export scheduled posts to CSV/JSON
-   - Generate posting schedule reports
-   - Backup/restore functionality
-   - Integration readiness for future Instagram API
+#### 5. Pages & Routing
 
-### Phase 7: UI/UX Polish
-1. **Design System**
-   - Implement wood-inspired color palette
-   - Create consistent spacing and typography
-   - Add smooth animations and transitions
-   - Implement dark/light mode toggle
+**5.1 Builds Page**
+```typescript
+// src/app/builds/page.tsx
+- Build list with search/filter
+- "Create New Build" button
+- Responsive grid layout
+- Loading and error states
+```
 
-2. **Responsive Design**
-   - Mobile-first approach
-   - Tablet-optimized layouts
-   - Desktop enhancement features
-   - Touch-friendly interactions
+**5.2 Build Details Page**
+```typescript
+// src/app/builds/[id]/page.tsx
+- Full build details view
+- Assigned photos display
+- Edit/delete actions
+- Photo assignment interface
+```
 
-3. **Error Handling & Loading States**
-   - Comprehensive error boundaries
-   - Loading skeletons for all async operations
-   - Toast notifications for user feedback
-   - Offline capability indicators
+**5.3 Create/Edit Build Page**
+```typescript
+// src/app/builds/new/page.tsx
+// src/app/builds/[id]/edit/page.tsx
+- Build form with validation
+- Cancel/save actions
+- Success/error feedback
+```
 
-### Phase 8: Testing & Validation
-1. **Component Testing**
-   - Unit tests for core components
-   - Integration tests for API interactions
-   - E2E tests for critical user flows
-   - Performance testing for large photo libraries
+#### 6. Custom Hooks
 
-2. **User Experience Testing**
-   - Photo assignment workflow testing
-   - Calendar scheduling validation
-   - Build management flow verification
-   - Cross-browser compatibility testing
+**6.1 useBuild Hook**
+```typescript
+// src/hooks/useBuild.ts
+export function useBuild(buildId: string) {
+  // Fetch single build with photos
+  // Loading/error states
+  // Refresh functionality
+}
+```
 
-### Technical Architecture Decisions
-- **State Management**: React Context + useReducer for global state
-- **Data Fetching**: Native fetch with custom hooks
-- **Image Optimization**: Next.js Image with Google Photos URLs
-- **Responsive Strategy**: Tailwind breakpoints with mobile-first
-- **Performance**: Virtual scrolling for large photo lists
-- **Security**: Secure token storage, API key protection
-- **Accessibility**: ARIA labels, keyboard navigation, screen reader support
+**6.2 useBuilds Hook**
+```typescript
+// src/hooks/useBuilds.ts
+export function useBuilds(filters?: BuildFilters) {
+  // Fetch builds list
+  // Search/filter functionality
+  // CRUD operations
+}
+```
+
+#### 7. UI Components
+
+**7.1 Confirmation Dialogs**
+```typescript
+// src/components/ui/ConfirmDialog.tsx
+- Delete build confirmation
+- Unsaved changes warning
+- Generic confirmation component
+```
+
+**7.2 Form Controls**
+```typescript
+// src/components/ui/Select.tsx - Wood type & style dropdowns
+// src/components/ui/DatePicker.tsx - Start date selection
+// src/components/ui/TextArea.tsx - Notes input
+// src/components/ui/SearchInput.tsx - Build search
+```
+
+#### 8. Implementation Order
+
+1. **Database Layer** - Build CRUD operations
+2. **API Routes** - Build endpoints with validation
+3. **Basic Form Component** - Create/edit builds
+4. **Build Context** - State management
+5. **Build List Page** - Display builds with basic actions
+6. **Build Card Component** - Individual build display
+7. **Build Details Page** - Full build view
+8. **Search & Filter** - Enhanced build discovery
+9. **Delete Confirmation** - Safe build deletion
+10. **UI Polish** - Loading states, error handling, responsive design
+
+#### 9. Testing Strategy
+
+- **Unit Tests**: Form validation, database operations
+- **Component Tests**: User interactions, state changes
+- **Integration Tests**: Full CRUD workflows
+- **E2E Tests**: Complete build management flow
+
+#### 10. Success Criteria
+
+- ✅ Create builds with all required fields and validation
+- ✅ Edit existing builds with proper form pre-population
+- ✅ Delete builds with confirmation and safety checks
+- ✅ Search and filter builds effectively
+- ✅ Responsive design works on all device sizes
+- ✅ Loading states and error handling work properly
+- ✅ All TypeScript types are properly implemented
+- ✅ Database operations are performant and reliable
 
 ## Rules
 - Follow BLUEPRINT → CONSTRUCT → VALIDATE workflow
@@ -193,9 +270,11 @@
 
 ## Log
 - Project initiated: Luthier Instagram Content Manager web application
-- Phase set to BLUEPRINT for detailed planning
-- Comprehensive 8-phase implementation plan created covering all requirements
-- Status set to NEEDS_PLAN_APPROVAL - awaiting user confirmation
+- Phases 1 & 2 completed: Project foundation, authentication, and Google Photos integration
+- Phase 3 BLUEPRINT created: Build Management System with comprehensive component architecture
+- Detailed implementation plan covers: Database layer, CRUD operations, UI components, state management
+- 10-step implementation order defined with clear success criteria
+- Status set to NEEDS_PLAN_APPROVAL - awaiting user confirmation for Phase 3 implementation
 
 ## ArchiveLog
 *[Empty - no archived logs yet]* 
