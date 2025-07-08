@@ -6,7 +6,7 @@
 ## Tech Stack
 
 ### Frontend
-- **Framework**: Next.js 14 with App Router
+- **Framework**: Next.js 15.3.5 with App Router
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v3.4
 - **UI Components**: Headless UI, React DnD
