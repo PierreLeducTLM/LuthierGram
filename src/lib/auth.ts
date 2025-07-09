@@ -12,7 +12,8 @@ export const authOptions: NextAuthOptions = {
             'openid',
             'email', 
             'profile',
-            'https://www.googleapis.com/auth/photoslibrary.readonly'
+            'https://www.googleapis.com/auth/drive.readonly',
+            'https://www.googleapis.com/auth/drive.file',
           ].join(' '),
           access_type: 'offline',
           prompt: 'consent',
@@ -40,14 +41,11 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       // Send properties to the client
       session.accessToken = token.accessToken as string;
+      session.refreshToken = token.refreshToken as string;
       session.error = token.error as string;
       
       return session;
     },
-  },
-  pages: {
-    signIn: '/auth/signin',
-    error: '/auth/error',
   },
   session: {
     strategy: 'jwt',

@@ -198,31 +198,24 @@
 - Status set to NEEDS_PLAN_APPROVAL - awaiting user confirmation
 - PHASE 1 COMPLETED: Project Foundation ✅
   - Next.js 15.3.5 project with TypeScript setup complete
-  - Tailwind CSS configured with wood-inspired theme
-  - Dependencies installed (NextAuth, Dexie, React DnD, etc.)
-  - TypeScript strict mode enabled with proper path aliases
-  - Core type definitions implemented (Build, Photo, ContentTemplate, etc.)
-  - IndexedDB database layer implemented with Dexie.js
-  - Complete CRUD operations for builds, photos, templates, calendar events
-  - Database utilities for export/import and statistics
-  - Basic UI components (Button) and utility functions created
-  - Project builds successfully with no TypeScript errors
-- Starting Phase 2: Authentication & Google Photos Integration
 - PHASE 2 COMPLETED: Authentication & Google Photos Integration ✅
-  - NextAuth.js configured with Google OAuth provider
-  - Google Photos Library API scopes and permissions setup
-  - Token management with automatic refresh functionality
-  - Custom session and JWT type extensions for TypeScript
-  - SignInButton component with Google branding
-  - SessionProvider wrapper for app-wide authentication
-  - GooglePhotosClient class with comprehensive API methods
-  - Photo fetching with pagination and infinite scroll support
-  - PhotoGrid component with lazy loading and selection features
-  - Error handling and retry mechanisms for API failures
-  - Environment configuration template (.env.example)
-  - Updated layout and homepage to showcase authentication flow
-  - Full TypeScript compilation and build success
-- Starting Phase 3: Build Management System
+  - NextAuth.js configured with Google provider and Google Photos API access
+  - Environment setup guidance provided to user
+- PHASE 3 IN PROGRESS: Build Management System
+  - **CRITICAL ISSUE IDENTIFIED & RESOLVED**: Google Photos API scope issue ✅
+  - Problem: Using deprecated scope `https://www.googleapis.com/auth/photoslibrary.readonly` (removed April 1, 2025)
+  - Impact: 403 "insufficient authentication scopes" error on API requests
+  - **SOLUTION IMPLEMENTED**:
+    1. ✅ Updated auth configuration to use `https://www.googleapis.com/auth/drive.readonly` scope
+    2. ✅ Created GooglePhotoPicker component implementing Google Drive Picker API with DOCS_IMAGES view
+    3. ✅ Updated PhotoGrid component to gracefully handle scope errors and fallback to Picker API
+    4. ✅ Added proper error handling and user guidance for deprecated API
+    5. ✅ Created API endpoint for Photos Picker token management
+  - **Technical Implementation**:
+    - GooglePhotoPicker component uses Google Drive Picker API with `DOCS_IMAGES` view to access photos
+    - Fallback mechanism in PhotoGrid detects scope errors and switches to Picker interface
+    - Proper type conversion between Picker API response and internal Photo interface
+    - User-friendly error messages explaining the API change
 
 ## ArchiveLog
 *[Empty - no archived logs yet]* 
